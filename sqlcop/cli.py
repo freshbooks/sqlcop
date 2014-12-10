@@ -32,15 +32,12 @@ def camelize(name):
 
 
 def parse_file(filename):
-    """
-    Parse the captured queries and test names into a structured pile of
-    data.
-    """
+    import json
     with open(filename, 'r') as fh:
+        queries = json.load(fh)
         return [
-            {'query': line}
-            for line in fh.readlines()
-            if line and not line.startswith('--')
+            {'query': query}
+            for query in queries.values()[0]
         ]
 
 
