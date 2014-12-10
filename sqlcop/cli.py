@@ -36,37 +36,12 @@ def parse_file(filename):
     Parse the captured queries and test names into a structured pile of
     data.
     """
-    output = []
     with open(filename, 'r') as fh:
-        lines = fh.readlines()
-
-    test_names = []
-    in_query = False
-    query = []
-    for line in lines:
-        # Blank line - with state
-        if not len(line.strip()) and len(query):
-            output.append({'query': ''.join(query), 'tests': test_names})
-            in_query = False
-            query = []
-            test_names = []
-
-        # Blank line - no state
-        if not len(line.strip()):
-            continue
-
-        if line.startswith('SELECT'):
-            in_query = True
-        if in_query:
-            query.append(line)
-        else:
-            test_names.append(line)
-
-    # Catch any leftovers
-    if len(query):
-        output.append({'query': ''.join(query), 'tests': test_names})
-
-    return output
+        return [
+            {'query': line}
+            for line in fh.readlines()
+            if line and not line.startswith('--')
+        ]
 
 
 def has_cross_join(stmt):
