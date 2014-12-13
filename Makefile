@@ -54,3 +54,6 @@ dist: clean
 	python setup.py sdist
 	python setup.py bdist_wheel
 	ls -l dist
+
+upload: dist
+	scp dist/*.whl $(YOURNAME)@optimus.2ndsiteinc.com:/var/www/packages/eggs/dev/sqlcop
