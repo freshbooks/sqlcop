@@ -34,8 +34,6 @@ def has_cross_join(stmt):
         # tables are in the where condition, the query should be ok.
         if (isinstance(tok, sqlparse.sql.Where)):
             where_clause = tok
-    # if where_clause and len(tables) > 1:
-    #     tables = remove_joined_tables(tables, where_clause)
     if len(tables) > 1:
         return True
     return False
