@@ -1,3 +1,1 @@
 sqlparse==0.1.14
-wsgiref==0.1.2
-wheel==0.24.0
