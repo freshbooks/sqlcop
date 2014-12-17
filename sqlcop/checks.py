@@ -1,4 +1,3 @@
-import sqlalchemy
 import sqlparse
 
 from collections import defaultdict
