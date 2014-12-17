@@ -35,16 +35,15 @@ lint:
 	flake8 sqlcop tests
 
 test:
-	python setup.py test
+	py.test tests/
 
 test-all:
 	tox
 
 coverage:
-	coverage run --source sqlcop setup.py test
+	coverage run --source sqlcop `which py.test` tests/
 	coverage report -m
 	coverage html
-	open htmlcov/index.html
 
 release: clean
 	python setup.py sdist upload
@@ -54,6 +53,3 @@ dist: clean
 	python setup.py sdist
 	python setup.py bdist_wheel
 	ls -l dist
-
-upload: dist
-	scp dist/*.whl $(YOURNAME)@optimus.2ndsiteinc.com:/var/www/packages/eggs/dev/sqlcop
