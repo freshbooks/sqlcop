@@ -1,12 +1,6 @@
 import sys
 import sqlparse
-from sqlalchemy.dialects.mysql.base import RESERVED_WORDS
 from .checks import has_cross_join
-
-
-for key in sqlparse.keywords.KEYWORDS.keys():
-    if key not in RESERVED_WORDS:
-        del sqlparse.keywords.KEYWORDS[key]
 
 
 def parse_file(filename):

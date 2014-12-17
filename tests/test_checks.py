@@ -17,3 +17,12 @@ def test_check_cross_join_has_cross_join():
     )
     stmt = sqlparse.parse(sql)[0]
     assert True == has_cross_join(stmt)
+
+
+def test_check_cross_join_no_cross_join_with_reserved_words():
+    sql = (
+        "SELECT * FROM user LEFT JOIN system "
+        "USING (id)"
+    )
+    stmt = sqlparse.parse(sql)[0]
+    assert False == has_cross_join(stmt)
