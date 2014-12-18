@@ -4,9 +4,7 @@ from .checks import has_cross_join
 
 
 def parse_file(filename):
-    import json
-    with open(filename, 'r') as fh:
-        return json.load(fh)
+    return open(filename, 'r').readlines()
 
 
 CHECKS = (
@@ -32,19 +30,17 @@ def main():
     except IndexError:
         raise Exception('Filename required')
     failed = False
-    for query, tests in queries.iteritems():
+    for query in queries:
         passed, message = check_query(query)
         if not passed:
             failed = True
-            print_message(message, tests, query)
+            print_message(message, query)
     sys.exit(255 if failed else 0)
 
 
-def print_message(message, tests, query):
+def print_message(message, query):
     print "FAILED - %s" % (message)
     print "-----------------------------------------------------------------"
-    print "Test Methods:"
-    print "%s" % "\n".join(tests)
     print
     print "Query:"
     print "%s" % query
