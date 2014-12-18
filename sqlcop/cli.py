@@ -1,6 +1,6 @@
 import sys
 import sqlparse
-from .checks import has_cross_join
+from .checks import CrossJoinCheck
 
 
 def parse_file(filename):
@@ -8,16 +8,20 @@ def parse_file(filename):
 
 
 CHECKS = (
-    (has_cross_join, 'query contains cross join'),
+    (CrossJoinCheck, 'query contains cross join'),
 )
 
 
-def check_query(el):
+def check_query(options, el):
     """
     Run each of the defined checks on a query.
     """
     stmt = sqlparse.parse(el)
-    for check in CHECKS:
+    checks = (
+        (check_class(**options), message)
+        for check_class, message in CHECKS
+    )
+    for check in checks:
         if check[0](stmt[0]):
             return False, check[1]
     return True, ''
@@ -30,8 +34,9 @@ def main():
     except IndexError:
         raise Exception('Filename required')
     failed = False
+    options = {}  # TODO
     for query in queries:
-        passed, message = check_query(query)
+        passed, message = check_query(options, query)
         if not passed:
             failed = True
             print_message(message, query)
@@ -40,7 +45,7 @@ def main():
 
 def print_message(message, query):
     print "FAILED - %s" % (message)
-    print "-----------------------------------------------------------------"
+    print "-" * 70
     print
     print "Query:"
     print "%s" % query
