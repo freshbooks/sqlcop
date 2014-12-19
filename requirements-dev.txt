@@ -4,3 +4,4 @@ flake8
 coverage
 mock==1.0.1
 memoized==0.2
+sqlalchemy
