@@ -17,6 +17,7 @@ class CrossJoinCheck(object):
         _patch()
         self.db_urls = options.get('db_urls', [])
 
+    @property
     @memoized
     def tables(self):
         tables = {}
@@ -27,6 +28,7 @@ class CrossJoinCheck(object):
             # Yes if you have the same table name in multiple databases
             # you'll have a bad time here
             tables.update(metadata.tables)
+        return tables
 
     def __call__(self, stmt):
         """

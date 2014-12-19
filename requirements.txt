@@ -1,1 +1,2 @@
 sqlparse==0.1.14
+memoized==0.2
