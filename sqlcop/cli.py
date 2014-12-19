@@ -1,5 +1,6 @@
 import sys
 import sqlparse
+import optparse
 from .checks import CrossJoinCheck
 
 
@@ -28,13 +29,27 @@ def check_query(options, el):
 
 
 def main():
-    argv = sys.argv
-    try:
-        queries = parse_file(argv[1])
-    except IndexError:
-        raise Exception('Filename required')
+    parser = optparse.OptionParser('sqlcop')
+    parser.add_option(
+        '--db-urls',
+        help=(
+            'Comma-separated db urls. '
+            'Used to fetch schema for the database so sqlcop '
+            'can make more accurate judgement based on the schema'
+        )
+    )
+    opt, args = parser.parse_args()
+    if len(args) < 1:
+        parser.error('SQL file required')
+
+    queries = parse_file(args[0])
+
+    db_urls = opt.db_urls.split(',')
+    if not isinstance(db_urls, list):
+        db_urls = list(db_urls)
+
     failed = False
-    options = {}  # TODO
+    options = {'db_urls': db_urls}
     for query in queries:
         passed, message = check_query(options, query)
         if not passed:
