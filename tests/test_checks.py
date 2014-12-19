@@ -125,7 +125,7 @@ class TestCheckCrossJoin(object):
             stmt = sqlparse.parse(sql)[0]
             assert True == self.has_cross_join(stmt)
 
-    def test_with_(self):
+    def test_with_more_join_tables(self):
         schema = {
             'u': [],
             'npl': [],
@@ -147,3 +147,25 @@ class TestCheckCrossJoin(object):
         with self.patch_schema(schema):
             stmt = sqlparse.parse(sql)[0]
             assert True == self.has_cross_join(stmt)
+
+    def test_with(self):
+        schema = {
+            'je': [],
+            'jed_1': [],
+        }
+        sql = (
+            "SELECT * FROM "
+            "  (SELECT * "
+            "  FROM je "
+            "  WHERE je.systemid = %s "
+            "  AND je.paymentid = %s  "
+            "  ORDER BY je.created DESC, "
+            "  LIMIT 0, 1) AS anon_1 "
+            "LEFT OUTER JOIN jed AS jed_1 ON "
+            "anon_1.xid = jed_1.xid"
+            "AND anon_1.systemid = jed_1.systemid "
+            "ORDER BY anon_1.created DESC"
+        )
+        with self.patch_schema(schema):
+            stmt = sqlparse.parse(sql)[0]
+            assert False == self.has_cross_join(stmt)
