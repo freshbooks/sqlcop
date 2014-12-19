@@ -108,7 +108,7 @@ class TestCheckCrossJoin(object):
             stmt = sqlparse.parse(sql)[0]
             assert False == self.has_cross_join(stmt)
 
-    def test_with_subselect(self):
+    def test_with_simple_subselect(self):
         tbl_i, tbl_npl = Mock(), Mock()
         tbl_i.primary_key.columns.keys.return_value = ['systemid']
         tbl_npl.primary_key.columns.keys.return_value = ['systemid']
@@ -141,14 +141,14 @@ class TestCheckCrossJoin(object):
             "LEFT OUTER JOIN cn AS cn_1 "
             "ON npl.systemid = cn_1.systemid AND npl.creditid = cn_1.creditid "
             "WHERE npl.systemid = %%s "
-            "AND (npl.invoiceid IS NOT NULL AND npl.invoiceid) != %s "
+            "AND (npl.invoiceid IS NOT NULL AND npl.invoiceid) != %%s "
             "ORDER BY npl.logid DESC"
         )
         with self.patch_schema(schema):
             stmt = sqlparse.parse(sql)[0]
             assert True == self.has_cross_join(stmt)
 
-    def test_with(self):
+    def test_with_subselect_complex(self):
         schema = {
             'je': [],
             'jed_1': [],
@@ -157,14 +157,34 @@ class TestCheckCrossJoin(object):
             "SELECT * FROM "
             "  (SELECT * "
             "  FROM je "
-            "  WHERE je.systemid = %s "
-            "  AND je.paymentid = %s  "
+            "  WHERE je.systemid = %%s "
+            "  AND je.paymentid = %%s  "
             "  ORDER BY je.created DESC, "
             "  LIMIT 0, 1) AS anon_1 "
             "LEFT OUTER JOIN jed AS jed_1 ON "
             "anon_1.xid = jed_1.xid"
             "AND anon_1.systemid = jed_1.systemid "
             "ORDER BY anon_1.created DESC"
+        )
+        with self.patch_schema(schema):
+            stmt = sqlparse.parse(sql)[0]
+            assert False == self.has_cross_join(stmt)
+
+    def test_with_no_cross_join_covered_by_where(self):
+        tbl_a, tbl_b = Mock(), Mock()
+        tbl_a.primary_key.columns.keys.return_value = ['projectid', 'systemid']
+        tbl_b.primary_key.columns.keys.return_value = ['projectid', 'systemid']
+        schema = {
+            'project': tbl_a,
+            'project_task': tbl_b,
+        }
+        sql = (
+            "SELECT * FROM project, project_task "
+            "WHERE %%s = project_task.taskid "
+            "AND %%s = project_task.systemid  "
+            "AND project_task.projectid = project.projectid "
+            "AND project_task.systemid = project.systemid "
+            "ORDER BY project.projectid ASC"
         )
         with self.patch_schema(schema):
             stmt = sqlparse.parse(sql)[0]
