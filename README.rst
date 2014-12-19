@@ -32,3 +32,11 @@ First, you use `nose-sqlcapture` to generate a SQL capture file::
 Run sqlcop on the generated sql log fie::
 
     sqlcop sql.log
+
+For some checks, a database schema is needed.  In that case, you need to supply the url to the database so sqlcop can grab the metadata::
+
+    sqlcop --db-urls=mysql://user:pwd@host:port/db sql.log
+
+You can specify more than one `db_urls` at once::
+
+    sqlcop --db-urls=mysql://user:pwd@host:port/db1,mysql://user:pwd@host:port/db2 sql.log
