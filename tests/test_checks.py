@@ -189,3 +189,23 @@ class TestCheckCrossJoin(object):
         with self.patch_schema(schema):
             stmt = sqlparse.parse(sql)[0]
             assert False == self.has_cross_join(stmt)
+
+    # def test_with(self):
+    #     tbl_a, tbl_b = Mock(), Mock()
+    #     tbl_a.primary_key.columns.keys.return_value = ['projectid', 'systemid']
+    #     tbl_b.primary_key.columns.keys.return_value = ['projectid', 'systemid']
+    #     schema = {
+    #         'project': tbl_a,
+    #         'project_task': tbl_b,
+    #     }
+    #     sql = (
+    #         "SELECT * FROM project, project_task "
+    #         "WHERE %%s = project_task.taskid "
+    #         "AND %%s = project_task.systemid  "
+    #         "AND project_task.projectid = project.projectid "
+    #         "OR project_task.systemid = project.systemid "
+    #         "ORDER BY project.projectid ASC"
+    #     )
+    #     with self.patch_schema(schema):
+    #         stmt = sqlparse.parse(sql)[0]
+    #         assert True == self.has_cross_join(stmt)
