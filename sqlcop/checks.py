@@ -1,5 +1,6 @@
 import sqlparse
 import sqlalchemy as sa
+from memoized import memoized
 from collections import defaultdict
 
 
@@ -14,10 +15,10 @@ def _patch():
 class CrossJoinCheck(object):
     def __init__(self, **options):
         _patch()
-        self.tables = self.get_tables()
         self.db_urls = options.get('db_urls', [])
 
-    def get_tables(self):
+    @memoized
+    def tables(self):
         tables = {}
         for db_url in self.db_urls:
             engine = sa.create_engine(db_url)
@@ -75,8 +76,17 @@ class CrossJoinCheck(object):
         """
         Pull out tuples of field identifiers from a sqlparse.sql.IdentifierList
         """
+        tokens = comparison.tokens
+        # If the comparison only involve one identifier,
+        # that means we have a where clause such as:
+        # a.active = 1, in which case we don't consider `active`
+        # a join column
+        is_identifier = lambda t: isinstance(t, sqlparse.sql.Identifier)
+        if len(filter(is_identifier, tokens)) < 2:
+            return []
+
         columns = []
-        for tok in comparison.tokens:
+        for tok in tokens:
             if (isinstance(tok, sqlparse.sql.Identifier) and
                     tok.get_parent_name() in tables):
                 column = (tok.get_parent_name(), tok.get_name())
