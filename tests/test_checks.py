@@ -24,7 +24,7 @@ class TestCheckCrossJoin(object):
                 "USING (id)"
             )
             stmt = sqlparse.parse(sql)[0]
-            assert False == CrossJoinCheck()(stmt)
+            assert False == self.has_cross_join(stmt)
 
     def test_has_cross_join(self):
         tbl_a, tbl_b = Mock(), Mock()
@@ -97,13 +97,53 @@ class TestCheckCrossJoin(object):
         with self.patch_schema(schema):
             sql = (
                 "SELECT * FROM user, ps "
-                "WHERE %s = ps.projectid "
-                "AND %s = ps.systemid "
+                "WHERE %%s = ps.projectid "
+                "AND %%s = ps.systemid "
                 "AND ps.systemid = user.systemid "
                 "AND ps.staffid = user.userid "
-                "AND user.level = %s "
-                "AND user.active = %s "
+                "AND user.level = %%s "
+                "AND user.active = %%s "
                 "ORDER BY user.userid ASC"
             )
             stmt = sqlparse.parse(sql)[0]
             assert False == self.has_cross_join(stmt)
+
+    def test_with_subselect(self):
+        tbl_i, tbl_npl = Mock(), Mock()
+        tbl_i.primary_key.columns.keys.return_value = ['systemid']
+        tbl_npl.primary_key.columns.keys.return_value = ['systemid']
+        schema = {
+            'i': tbl_i,
+            'npl': tbl_npl,
+        }
+        sql = (
+            "SELECT * FROM "
+            "(SELECT * FROM inv WHERE systemid = %%s) i, "
+            "npl WHERE systemid = %%s"
+        )
+        with self.patch_schema(schema):
+            stmt = sqlparse.parse(sql)[0]
+            assert True == self.has_cross_join(stmt)
+
+    def test_with_(self):
+        schema = {
+            'u': [],
+            'npl': [],
+            'gwo': [],
+        }
+        sql = (
+            "SELECT * "
+            "FROM u AS u_1, npl"
+            "LEFT OUTER JOIN gwo AS gwo_1 "
+            "ON gwo_1.systemid = npl.systemid AND gwo_1.orderid = npl.orderid "
+            "LEFT OUTER JOIN i AS i_1 "
+            "ON npl.systemid = i_1.systemid AND npl.invoiceid = i_1.invoiceid "
+            "LEFT OUTER JOIN cn AS cn_1 "
+            "ON npl.systemid = cn_1.systemid AND npl.creditid = cn_1.creditid "
+            "WHERE npl.systemid = %%s "
+            "AND (npl.invoiceid IS NOT NULL AND npl.invoiceid) != %s "
+            "ORDER BY npl.logid DESC"
+        )
+        with self.patch_schema(schema):
+            stmt = sqlparse.parse(sql)[0]
+            assert True == self.has_cross_join(stmt)
