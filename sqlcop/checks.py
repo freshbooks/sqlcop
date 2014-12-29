@@ -105,7 +105,7 @@ class CrossJoinCheck(object):
         if not where_clause:
             return tables
         for tok in where_clause.tokens:
-            if tok.match(sqlparse.tokens.Keyword, 'AND', False):
+            if tok.match(sqlparse.tokens.Keyword, 'AND|OR', True):
                 operator = tok.value
 
             if (isinstance(tok, sqlparse.sql.Comparison)
