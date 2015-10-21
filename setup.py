@@ -21,7 +21,7 @@ setup(
     long_description=readme + '\n\n',
     author='Kevin Qiu',
     author_email='kevin@freshbooks.com',
-    url='https://github.2ndsiteinc.com/kevin/sqlcop',
+    url='https://github.com/freshbooks/sqlcop',
     packages=[
         'sqlcop',
     ],
