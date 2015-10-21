@@ -4,17 +4,8 @@ from memoized import memoized
 from collections import defaultdict
 
 
-def _patch():
-    from sqlalchemy.dialects.mysql.base import RESERVED_WORDS
-
-    for key in sqlparse.keywords.KEYWORDS.keys():
-        if key not in RESERVED_WORDS:
-            del sqlparse.keywords.KEYWORDS[key]
-
-
 class CrossJoinCheck(object):
     def __init__(self, **options):
-        _patch()
         self.db_urls = options.get('db_urls', [])
 
     @property

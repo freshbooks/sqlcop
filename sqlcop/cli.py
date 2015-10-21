@@ -1,7 +1,8 @@
 import sys
 import sqlparse
 import optparse
-from .checks import CrossJoinCheck
+from .checks.cross_join import CrossJoinCheck
+from .checks.order_by_count import OrderByCountCheck
 
 
 def parse_file(filename):
@@ -10,6 +11,7 @@ def parse_file(filename):
 
 CHECKS = (
     (CrossJoinCheck, 'query contains cross join'),
+    (OrderByCountCheck, 'query contains a count with an order by clause')
 )
 
 

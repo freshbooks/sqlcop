@@ -1,6 +1,6 @@
 import sqlparse
 import contextlib
-from sqlcop.checks import CrossJoinCheck
+from sqlcop.checks.cross_join import CrossJoinCheck
 from mock import Mock, patch, PropertyMock
 
 
@@ -11,7 +11,8 @@ class TestCheckCrossJoin(object):
     @contextlib.contextmanager
     def patch_schema(self, table_schema):
         ctx_mgr = patch(
-            'sqlcop.checks.CrossJoinCheck.tables', new_callable=PropertyMock)
+            'sqlcop.checks.cross_join.CrossJoinCheck.tables',
+            new_callable=PropertyMock)
         tables = ctx_mgr.__enter__()
         tables.__get__ = Mock(return_value=table_schema)
         yield
