@@ -9,4 +9,4 @@ class OrderByCountCheck(object):
         self.db_urls = options.get('db_urls', [])
 
     def __call__(self, stmt):
-        pass
+        return False

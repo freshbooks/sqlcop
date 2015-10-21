@@ -1,0 +1,28 @@
+import sqlparse
+import contextlib
+from sqlcop.checks.order_by_count import OrderByCountCheck
+from mock import Mock, patch, PropertyMock
+
+
+class TestOrderByCountCheck(object):
+    def setup_method(self, method):
+        self.has_order_by_count = OrderByCountCheck()
+
+    @contextlib.contextmanager
+    def patch_schema(self, table_schema):
+        ctx_mgr = patch(
+            'sqlcop.checks.cross_join.CrossJoinCheck.tables',
+            new_callable=PropertyMock)
+        tables = ctx_mgr.__enter__()
+        tables.__get__ = Mock(return_value=table_schema)
+        yield
+        ctx_mgr.__exit__()
+
+    def test_ok(self):
+        with self.patch_schema({}):
+            sql = (
+                "SELECT COUNT(*) FROM a LEFT JOIN b "
+                "USING (id)"
+            )
+            stmt = sqlparse.parse(sql)[0]
+            assert False == self.has_order_by_count(stmt)
