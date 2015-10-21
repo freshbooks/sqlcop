@@ -70,3 +70,9 @@ class TestOrderByCountCheck(object):
             )
             stmt = sqlparse.parse(sql)[0]
             assert True == self.has_order_by_count(stmt)
+
+    def test_group_by_and_order(self):
+        with self.patch_schema({}):
+            sql = "select x, count(*) from t group by x order by count(*)"
+            stmt = sqlparse.parse(sql)[0]
+            assert True == self.has_order_by_count(stmt)
