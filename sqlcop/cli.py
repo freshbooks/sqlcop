@@ -1,7 +1,7 @@
 import sys
 import sqlparse
 import optparse
-from .checks import CrossJoinCheck
+from .checks.cross_join import CrossJoinCheck
 
 
 def parse_file(filename):
