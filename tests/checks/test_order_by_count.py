@@ -26,3 +26,47 @@ class TestOrderByCountCheck(object):
             )
             stmt = sqlparse.parse(sql)[0]
             assert False == self.has_order_by_count(stmt)
+
+            sql = (
+                "SELECT COUNT(*) FROM a LEFT JOIN b "
+                "USING (id)"
+            )
+            stmt = sqlparse.parse(sql)[0]
+            assert False == self.has_order_by_count(stmt)
+
+    def test_no_subquery(self):
+        with self.patch_schema({}):
+            sql = (
+                "SELECT COUNT(*) FROM a ORDER BY a.id DESC"
+            )
+            stmt = sqlparse.parse(sql)[0]
+            assert True == self.has_order_by_count(stmt)
+
+            sql = (
+                "SELECT COUNT(1) FROM a ORDER BY a.id DESC"
+            )
+            stmt = sqlparse.parse(sql)[0]
+            assert True == self.has_order_by_count(stmt)
+
+    def test_subquery_no_order(self):
+        """
+        This query pattern is often emitted by SQLa
+        """
+        with self.patch_schema({}):
+            sql = (
+                "SELECT COUNT(*) FROM (SELECT DISTINCT id FROM a)"
+            )
+            stmt = sqlparse.parse(sql)[0]
+            assert False == self.has_order_by_count(stmt)
+
+    def test_subquery_with_order(self):
+        """
+        This query pattern is often emitted by SQLa
+        """
+        with self.patch_schema({}):
+            sql = (
+                "SELECT COUNT(*) FROM ("
+                "SELECT DISTINCT id FROM a ORDER BY id DESC) a"
+            )
+            stmt = sqlparse.parse(sql)[0]
+            assert True == self.has_order_by_count(stmt)
