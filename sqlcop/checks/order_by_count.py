@@ -14,6 +14,7 @@ class OrderByCountCheck(object):
     def __call__(self, stmt):
         has_count = False
         has_order = False
+        has_group = False
         for i, tok in enumerate(stmt.tokens):
             if 'COUNT(' in str(tok).upper():
                 has_count = True
@@ -34,7 +35,11 @@ class OrderByCountCheck(object):
 
             if tok.match(sqlparse.tokens.Keyword, 'ORDER'):
                 has_order = True
+            if tok.match(sqlparse.tokens.Keyword, 'GROUP'):
+                has_group = True
 
+        if has_count and has_group and has_order:
+            return False
         if has_count and has_order:
             return True
         return False
