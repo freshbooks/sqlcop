@@ -27,6 +27,16 @@ class TestOrderByCountCheck(object):
             stmt = sqlparse.parse(sql)[0]
             assert False == self.has_order_by_count(stmt)
 
+    def test_ok_not_count(self):
+        with self.patch_schema({}):
+            sql = "SELECT * FROM a ORDER BY id DESC"
+            stmt = sqlparse.parse(sql)[0]
+            assert False == self.has_order_by_count(stmt)
+
+            sql = "SELECT a, b, count FROM a ORDER BY id DESC"
+            stmt = sqlparse.parse(sql)[0]
+            assert False == self.has_order_by_count(stmt)
+
     def test_no_subquery(self):
         with self.patch_schema({}):
             sql = (

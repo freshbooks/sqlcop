@@ -15,7 +15,7 @@ class OrderByCountCheck(object):
         has_count = False
         has_order = False
         for i, tok in enumerate(stmt.tokens):
-            if 'COUNT' in str(tok).upper():
+            if 'COUNT(' in str(tok).upper():
                 has_count = True
 
             if tok.match(sqlparse.tokens.Keyword, 'FROM'):
