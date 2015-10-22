@@ -1,8 +1,8 @@
 import sys
 import sqlparse
 import optparse
-from .checks.cross_join import CrossJoinCheck
-from .checks.order_by_count import OrderByCountCheck
+from sqlcop.checks.cross_join import CrossJoinCheck
+from sqlcop.checks.order_by_count import OrderByCountCheck
 
 
 def parse_file(filename):
