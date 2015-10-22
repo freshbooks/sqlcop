@@ -3,9 +3,9 @@
 
 
 try:
-    from setuptools import setup
+    from setuptools import setup, find_packages
 except ImportError:
-    from distutils.core import setup
+    from distutils.core import setup, find_packages
 
 
 readme = open('README.rst').read()
@@ -22,11 +22,7 @@ setup(
     author='Kevin Qiu',
     author_email='kevin@freshbooks.com',
     url='https://github.com/freshbooks/sqlcop',
-    packages=[
-        'sqlcop',
-    ],
-    package_dir={'sqlcop':
-                 'sqlcop'},
+    packages=find_packages(exclude=['test*']),
     include_package_data=True,
     install_requires=requirements,
     license="BSD",
