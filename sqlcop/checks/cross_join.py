@@ -19,6 +19,7 @@ class CrossJoinCheck(object):
             # Yes if you have the same table name in multiple databases
             # you'll have a bad time here
             tables.update(metadata.tables)
+
         return tables
 
     def __call__(self, stmt):
@@ -36,6 +37,7 @@ class CrossJoinCheck(object):
             if (isinstance(tok, sqlparse.sql.Where) or
                     tok.match(sqlparse.tokens.Keyword.DML, 'SELECT') or
                     tok.match(sqlparse.tokens.Keyword, 'INNER JOIN') or
+                    tok.match(sqlparse.tokens.Keyword, 'GROUP') or
                     tok.match(sqlparse.tokens.Keyword, 'LEFT OUTER JOIN')):
                 in_from = False
 
