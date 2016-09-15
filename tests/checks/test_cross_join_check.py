@@ -210,3 +210,21 @@ class TestCheckCrossJoin(object):
         with self.patch_schema(schema):
             stmt = sqlparse.parse(sql)[0]
             assert True == self.has_cross_join(stmt)
+
+    def test_with_cross_join_with_group_and_subquery(self):
+        tbl_a, tbl_b = Mock(), Mock()
+        tbl_a.primary_key.columns.keys.return_value = ['projectid', 'systemid']
+        tbl_b.primary_key.columns.keys.return_value = ['projectid', 'systemid']
+        schema = {
+            'project': tbl_a,
+        }
+        sql = (
+            "SELECT projectid, name FROM ("
+            "SELECT projectid FROM project"
+            ") as anon_1 "
+            "GROUP BY projectid, name "
+            "ORDER BY anon_1.projectid ASC"
+        )
+        with self.patch_schema(schema):
+            stmt = sqlparse.parse(sql)[0]
+            assert False == self.has_cross_join(stmt)
