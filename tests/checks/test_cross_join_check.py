@@ -1,3 +1,4 @@
+from builtins import object
 import sqlparse
 import contextlib
 from sqlcop.checks.cross_join import CrossJoinCheck

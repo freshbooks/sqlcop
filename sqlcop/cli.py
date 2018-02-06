@@ -1,3 +1,4 @@
+from __future__ import print_function
 import sys
 import sqlparse
 import optparse
@@ -61,8 +62,8 @@ def main():
 
 
 def print_message(message, query):
-    print "FAILED - %s" % (message)
-    print "-" * 70
-    print
-    print "Query:"
-    print "%s" % query
+    print("FAILED - %s" % (message))
+    print("-" * 70)
+    print()
+    print("Query:")
+    print("%s" % query)
