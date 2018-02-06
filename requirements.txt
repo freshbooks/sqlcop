@@ -1,3 +1,4 @@
 sqlparse==0.2.4
 memoized-property==1.0.3
+setuptools==38.5.0
 future
