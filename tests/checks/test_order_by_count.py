@@ -1,3 +1,4 @@
+from builtins import object
 import sqlparse
 import contextlib
 from sqlcop.checks.order_by_count import OrderByCountCheck

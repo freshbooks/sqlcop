@@ -1,6 +1,8 @@
+from builtins import filter
+from builtins import object
 import sqlparse
 import sqlalchemy as sa
-from memoized import memoized
+from memoized_property import memoized_property
 from collections import defaultdict
 
 
@@ -9,7 +11,7 @@ class CrossJoinCheck(object):
         self.db_urls = options.get('db_urls', [])
 
     @property
-    @memoized
+    @memoized_property
     def tables(self):
         tables = {}
         for db_url in self.db_urls:
@@ -64,7 +66,7 @@ class CrossJoinCheck(object):
         retval = defaultdict(list)
         for table_name in column_map:
             retval[table_name] = \
-                self.tables[table_name].primary_key.columns.keys()
+                list(self.tables[table_name].primary_key.columns.keys())
         return retval
 
     def _extract_join_columns(self, tables, comparison):
@@ -77,7 +79,7 @@ class CrossJoinCheck(object):
         # a.active = 1, in which case we don't consider `active`
         # a join column
         is_identifier = lambda t: isinstance(t, sqlparse.sql.Identifier)
-        if len(filter(is_identifier, tokens)) < 2:
+        if len(list(filter(is_identifier, tokens))) < 2:
             return []
 
         columns = []

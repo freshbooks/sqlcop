@@ -3,4 +3,4 @@ pytest
 flake8
 coverage
 mock==1.0.1
-sqlalchemy
+sqlalchemy==1.2.2
