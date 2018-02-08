@@ -10,7 +10,6 @@ class CrossJoinCheck(object):
     def __init__(self, **options):
         self.db_urls = options.get('db_urls', [])
 
-    @property
     @memoized_property
     def tables(self):
         tables = {}
