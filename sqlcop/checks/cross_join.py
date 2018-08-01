@@ -31,6 +31,7 @@ class CrossJoinCheck(object):
         in_from = False
         where_clause = False
         tables = []
+
         for i, tok in enumerate(stmt.tokens):
             if tok.match(sqlparse.tokens.Keyword, 'FROM'):
                 in_from = True
@@ -39,7 +40,8 @@ class CrossJoinCheck(object):
                     tok.match(sqlparse.tokens.Keyword.DML, 'SELECT') or
                     tok.match(sqlparse.tokens.Keyword, 'INNER JOIN') or
                     tok.match(sqlparse.tokens.Keyword, 'GROUP') or
-                    tok.match(sqlparse.tokens.Keyword, 'LEFT OUTER JOIN')):
+                    tok.match(sqlparse.tokens.Keyword, 'LEFT OUTER JOIN') or
+                    (isinstance(tok, sqlparse.sql.Identifier) and tok.value == 'LIMIT')):
                 in_from = False
 
             # If we are in the FROM section of a query we could find cross
