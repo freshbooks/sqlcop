@@ -286,3 +286,24 @@ class TestCheckCrossJoin(object):
         with self.patch_schema(schema):
             stmt = sqlparse.parse(sql)[0]
             assert False == self.has_cross_join(stmt)
+
+    def test_with_cross_join_with_limit(self):
+        tbl_a, tbl_b, tbl_c = Mock(), Mock(), Mock()
+        tbl_a.primary_key.columns.keys.return_value = ['arrowid']
+        tbl_b.primary_key.columns.keys.return_value = ['bookid']
+        tbl_c.primary_key.columns.keys.return_value = ['cookid']
+        schema = {
+            'arrow': tbl_a,
+            'book': tbl_b,
+            'cook': tbl_c,
+        }
+        sql = (
+            "SELECT * "
+            "FROM arrow "
+            "JOIN book "
+            "JOIN cook "
+            "LIMIT 1, 2"
+        )
+        with self.patch_schema(schema):
+            stmt = sqlparse.parse(sql)[0]
+            assert self.has_cross_join(stmt)
