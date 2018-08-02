@@ -260,14 +260,12 @@ class TestCheckCrossJoin(object):
             assert False == self.has_cross_join(stmt)
 
     def test_with_no_cross_join_with_inner_limit(self):
-        tbl_a, tbl_b, tbl_c = Mock(), Mock(), Mock()
+        tbl_a, tbl_b = Mock(), Mock()
         tbl_a.primary_key.columns.keys.return_value = ['arrowid']
         tbl_b.primary_key.columns.keys.return_value = ['bookid']
-        tbl_c.primary_key.columns.keys.return_value = ['cookid']
         schema = {
             'arrow': tbl_a,
-            'book': tbl_b,
-            'cook': tbl_c,
+            'book': tbl_b
         }
         sql = (
             "SELECT * "
@@ -277,8 +275,8 @@ class TestCheckCrossJoin(object):
             "    WHERE 1=1 "
             "    LIMIT 2"
             "  UNION ALL"
-            "    SELECT cookid AS objectid"
-            "    FROM cook"
+            "    SELECT bookid AS objectid"
+            "    FROM book"
             ") "
             "ORDER BY objectid DESC "
             "LIMIT 1, 2"
