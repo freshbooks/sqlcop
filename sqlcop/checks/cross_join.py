@@ -42,7 +42,7 @@ class CrossJoinCheck(object):
                     tok.match(sqlparse.tokens.Keyword, 'GROUP') or
                     tok.match(sqlparse.tokens.Keyword, 'LEFT OUTER JOIN') or
                     tok.match(sqlparse.tokens.Keyword, 'ORDER') or
-                    (isinstance(tok, sqlparse.sql.Identifier) and tok.value == 'LIMIT')):
+                    tok.match(sqlparse.tokens.Keyword, 'LIMIT')):
                 in_from = False
 
             # If we are in the FROM section of a query we could find cross
@@ -51,6 +51,12 @@ class CrossJoinCheck(object):
                 # A list of identifiers is bad - probably a cross join.
                 if isinstance(tok, sqlparse.sql.IdentifierList):
                     tables += tok.get_identifiers()
+
+                # If we are doing full joins between tables, we should be worried.
+                elif isinstance(tok, sqlparse.sql.Identifier) and (
+                    (stmt[i-2].match(sqlparse.tokens.Keyword, 'FROM')) or (
+                        stmt[i-2].match(sqlparse.tokens.Keyword, 'JOIN'))):
+                    tables.append(tok)
 
             # Collect conditions and see if some primary keys
             # are missing. If all the primary keys for all the
