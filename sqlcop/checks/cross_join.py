@@ -41,6 +41,7 @@ class CrossJoinCheck(object):
                     tok.match(sqlparse.tokens.Keyword, 'INNER JOIN') or
                     tok.match(sqlparse.tokens.Keyword, 'GROUP') or
                     tok.match(sqlparse.tokens.Keyword, 'LEFT OUTER JOIN') or
+                    tok.match(sqlparse.tokens.Keyword, 'ORDER') or
                     (isinstance(tok, sqlparse.sql.Identifier) and tok.value == 'LIMIT')):
                 in_from = False
 
