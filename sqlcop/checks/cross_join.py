@@ -53,9 +53,7 @@ class CrossJoinCheck(object):
                     tables += tok.get_identifiers()
 
                 # If we are doing full joins between tables, we should be worried.
-                elif isinstance(tok, sqlparse.sql.Identifier) and (
-                    (stmt[i-2].match(sqlparse.tokens.Keyword, 'FROM')) or (
-                        stmt[i-2].match(sqlparse.tokens.Keyword, 'JOIN'))):
+                elif self._token_should_append_to_tables(stmt, tok, i):
                     tables.append(tok)
 
             # Collect conditions and see if some primary keys
@@ -69,6 +67,11 @@ class CrossJoinCheck(object):
         if len(tables) > 1:
             return True
         return False
+
+    def _token_should_append_to_tables(self, stmt, token, index):
+        return isinstance(token, sqlparse.sql.Identifier) and (
+            stmt[index-2].match(sqlparse.tokens.Keyword, 'FROM')) or (
+            stmt[index-2].match(sqlparse.tokens.Keyword, 'JOIN'))
 
     def _get_table_keys(self, column_map):
         retval = defaultdict(list)
