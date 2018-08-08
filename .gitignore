@@ -1,6 +1,7 @@
 *.py[cod]
 .idea/*
 .pytest_cache/
+.python-version
 # C extensions
 *.so
 

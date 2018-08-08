@@ -2,7 +2,7 @@ from builtins import object
 import sqlparse
 import contextlib
 from sqlcop.checks.cross_join import CrossJoinCheck
-from mock import Mock, patch, PropertyMock
+from mock import Mock, patch, PropertyMock, MagicMock
 
 
 class TestCheckCrossJoin(object):
@@ -305,3 +305,136 @@ class TestCheckCrossJoin(object):
         with self.patch_schema(schema):
             stmt = sqlparse.parse(sql)[0]
             assert self.has_cross_join(stmt)
+
+    def test_with_cross_join_with_order(self):
+        tbl_a, tbl_b, tbl_c = Mock(), Mock(), Mock()
+        tbl_a.primary_key.columns.keys.return_value = ['arrowid']
+        tbl_b.primary_key.columns.keys.return_value = ['bookid']
+        tbl_c.primary_key.columns.keys.return_value = ['cookid']
+        schema = {
+            'arrow': tbl_a,
+            'book': tbl_b,
+            'cook': tbl_c,
+        }
+        sql = (
+            "SELECT * "
+            "FROM arrow "
+            "JOIN book "
+            "JOIN cook "
+            "ORDER BY arrow.arrowid DESC, book.bookid ASC"
+        )
+        with self.patch_schema(schema):
+            stmt = sqlparse.parse(sql)[0]
+            assert self.has_cross_join(stmt)
+
+    def test_with_no_cross_join_with_inner_order(self):
+        tbl_a, tbl_b = Mock(), Mock()
+        tbl_a.primary_key.columns.keys.return_value = ['arrowid']
+        tbl_b.primary_key.columns.keys.return_value = ['bookid']
+        schema = {
+            'arrow': tbl_a,
+            'book': tbl_b
+        }
+        sql = (
+            "SELECT * "
+            "FROM ("
+            "    SELECT arrowid AS objectid, "
+            "    'arrow' as string "
+            "    FROM arrow "
+            "    WHERE 1=1 "
+            "    ORDER BY arrow.arrowid"
+            "  UNION ALL"
+            "    SELECT bookid AS objectid, "
+            "    'book' as string "
+            "    FROM book"
+            ") as anon1 "
+            "ORDER BY anon1.objectid DESC, anon1.string ASC"
+        )
+        with self.patch_schema(schema):
+            stmt = sqlparse.parse(sql)[0]
+            assert False == self.has_cross_join(stmt)
+
+    def test_token_should_append_to_tables(self):
+        expected_tables = ['arrow', 'book', 'cook']
+        tbl_a, tbl_b, tbl_c = Mock(), Mock(), Mock()
+        tbl_a.primary_key.columns.keys.return_value = ['arrowid']
+        tbl_b.primary_key.columns.keys.return_value = ['bookid']
+        tbl_c.primary_key.columns.keys.return_value = ['cookid']
+        schema = {
+            'arrow': tbl_a,
+            'book': tbl_b,
+            'cook': tbl_c,
+        }
+        sql = (
+            "SELECT * "
+            "FROM arrow "
+            "JOIN book "
+            "JOIN cook "
+        )
+        with self.patch_schema(schema):
+            self.has_cross_join.tables = MagicMock()
+            stmt = sqlparse.parse(sql)[0]
+            assert self.has_cross_join(stmt)
+            for table in expected_tables:
+                assert table in self.has_cross_join.tables
+
+    def test_token_should_append_to_tables__from(self):
+        expected_tables = ['arrow']
+        tbl_a = Mock()
+        tbl_a.primary_key.columns.keys.return_value = ['arrowid']
+        schema = {
+            'arrow': tbl_a,
+        }
+        sql = (
+            "SELECT * "
+            "FROM arrow "
+        )
+        with self.patch_schema(schema):
+            self.has_cross_join.tables = MagicMock()
+            stmt = sqlparse.parse(sql)[0]
+            assert False == self.has_cross_join(stmt)
+            for table in expected_tables:
+                assert table in self.has_cross_join.tables
+
+    def test_token_should_append_to_tables__from_list(self):
+        expected_tables = ['arrow', 'book']
+        tbl_a, tbl_b = Mock(), Mock()
+        tbl_a.primary_key.columns.keys.return_value = ['arrowid']
+        tbl_b.primary_key.columns.keys.return_value = ['bookid']
+        schema = {
+            'arrow': tbl_a,
+            'book': tbl_b,
+        }
+        sql = (
+            "SELECT * "
+            "FROM arrow, book "
+        )
+        with self.patch_schema(schema):
+            self.has_cross_join.tables = MagicMock()
+            stmt = sqlparse.parse(sql)[0]
+            assert self.has_cross_join(stmt)
+            for table in expected_tables:
+                assert table in self.has_cross_join.tables
+
+    def test_token_should_append_to_tables__join(self):
+        expected_tables = ['arrow', 'book', 'cook']
+        tbl_a, tbl_b, tbl_c = Mock(), Mock(), Mock()
+        tbl_a.primary_key.columns.keys.return_value = ['arrowid']
+        tbl_b.primary_key.columns.keys.return_value = ['bookid']
+        tbl_c.primary_key.columns.keys.return_value = ['cookid']
+        schema = {
+            'arrow': tbl_a,
+            'book': tbl_b,
+            'cook': tbl_c,
+        }
+        sql = (
+            "SELECT * "
+            "FROM arrow "
+            "JOIN book, cook "
+        )
+        with self.patch_schema(schema):
+            self.has_cross_join.tables = MagicMock()
+            stmt = sqlparse.parse(sql)[0]
+            assert self.has_cross_join(stmt)
+            for table in expected_tables:
+                assert table in self.has_cross_join.tables

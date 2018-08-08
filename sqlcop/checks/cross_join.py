@@ -41,7 +41,8 @@ class CrossJoinCheck(object):
                     tok.match(sqlparse.tokens.Keyword, 'INNER JOIN') or
                     tok.match(sqlparse.tokens.Keyword, 'GROUP') or
                     tok.match(sqlparse.tokens.Keyword, 'LEFT OUTER JOIN') or
-                    (isinstance(tok, sqlparse.sql.Identifier) and tok.value == 'LIMIT')):
+                    tok.match(sqlparse.tokens.Keyword, 'ORDER') or
+                    tok.match(sqlparse.tokens.Keyword, 'LIMIT')):
                 in_from = False
 
             # If we are in the FROM section of a query we could find cross
@@ -50,6 +51,10 @@ class CrossJoinCheck(object):
                 # A list of identifiers is bad - probably a cross join.
                 if isinstance(tok, sqlparse.sql.IdentifierList):
                     tables += tok.get_identifiers()
+
+                # If we are doing full joins between tables, we should be worried.
+                elif self._token_should_append_to_tables(stmt, tok, i):
+                    tables.append(tok)
 
             # Collect conditions and see if some primary keys
             # are missing. If all the primary keys for all the
@@ -62,6 +67,11 @@ class CrossJoinCheck(object):
         if len(tables) > 1:
             return True
         return False
+
+    def _token_should_append_to_tables(self, stmt, token, index):
+        return isinstance(token, sqlparse.sql.Identifier) and (
+            stmt[index-2].match(sqlparse.tokens.Keyword, 'FROM')) or (
+            stmt[index-2].match(sqlparse.tokens.Keyword, 'JOIN'))
 
     def _get_table_keys(self, column_map):
         retval = defaultdict(list)
