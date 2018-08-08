@@ -10,7 +10,7 @@ except ImportError:
 
 readme = open('README.rst').read()
 
-requirements = map(str.strip, open('requirements.txt').readlines())
+requirements = open('./requirements.txt', 'r').readlines()
 
 VERSION = open('VERSION').read().strip()
 
