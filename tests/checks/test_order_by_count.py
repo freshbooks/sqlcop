@@ -94,9 +94,9 @@ class TestOrderByCountCheck(object):
             stmt = sqlparse.parse(sql)[0]
             assert False == self.has_order_by_count(stmt)
 
-    def test_attribute_error_is_raised_if_expression_cannot_be_found_in_from(self):
-        with raises(AttributeError, match=r"Failed to find expression for (\w+)"):
-            with self.patch_schema({}):
-                sql = "select x from"
-                stmt = sqlparse.parse(sql)[0]
-                self.has_order_by_count(stmt)
+    def test_find_sub_query_or_table_ignores_keyword_tokens(self):
+        # system is a keyword, it will not be matched as an Identifier.
+        with self.patch_schema({}):
+            sql = "SELECT a, b FROM system"
+            stmt = sqlparse.parse(sql)[0]
+            assert False == self.has_order_by_count(stmt)

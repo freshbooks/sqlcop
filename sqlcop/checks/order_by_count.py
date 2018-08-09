@@ -30,16 +30,7 @@ class OrderByCountCheck(object):
                 # returns an Identifier. We still need to check if that
                 # Identifier actually has child tokens.
                 if not expression:
-                    try:
-                        identifier = stmt.token_next_by(
-                            i=Identifier, idx=i)[-1].token_first()
-                        if identifier and hasattr(identifier, 'tokens'):
-                            expression = identifier
-
-                    except AttributeError:
-                        raise AttributeError(
-                            "Failed to find expression for Token "
-                            "\"{}\" (index: {}) in statement:\n{}".format(tok, i, stmt))
+                    expression = self._find_sub_query_or_table(i, stmt)
 
                 # The inner expression might contain a subquery,
                 # which could contain an ORDER by which we want to avoid
@@ -65,3 +56,11 @@ class OrderByCountCheck(object):
             if tok.match(Keyword, 'ORDER'):
                 return True
         return False
+
+    def _find_sub_query_or_table(self, i, stmt):
+        token_match = stmt.token_next_by(i=Identifier, idx=i)[-1]
+        if token_match:
+            identifier = token_match.token_first()
+            if identifier and hasattr(identifier, 'tokens'):
+                return identifier
+        return None
