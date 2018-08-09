@@ -3,6 +3,7 @@ import sqlparse
 import contextlib
 from sqlcop.checks.order_by_count import OrderByCountCheck
 from mock import Mock, patch, PropertyMock
+from pytest import raises
 
 
 class TestOrderByCountCheck(object):
@@ -92,3 +93,10 @@ class TestOrderByCountCheck(object):
             sql = "select x, count(*) from t group by x order by count(*)"
             stmt = sqlparse.parse(sql)[0]
             assert False == self.has_order_by_count(stmt)
+
+    def test_attribute_error_is_raised_if_expression_cannot_be_found_in_from(self):
+        with raises(AttributeError, match=r"Failed to find expression for (\w+)"):
+            with self.patch_schema({}):
+                sql = "select x from"
+                stmt = sqlparse.parse(sql)[0]
+                self.has_order_by_count(stmt)
