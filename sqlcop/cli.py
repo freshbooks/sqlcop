@@ -45,7 +45,7 @@ def main():
     if len(args) < 1:
         parser.error('SQL file required')
 
-    queries = parse_file(args[0])
+    lines = parse_file(args[0])
 
     db_urls = opt.db_urls.split(',')
     if not isinstance(db_urls, list):
@@ -53,17 +53,27 @@ def main():
 
     failed = False
     options = {'db_urls': db_urls}
-    for query in queries:
-        passed, message = check_query(options, query)
+    last_comment = ''
+    for line in lines:
+        passed, message = check_query(options, line)
         if not passed:
             failed = True
-            print_message(message, query)
+            print_message(message, line, last_comment)
+        if line.startswith('-- '):
+            last_comment = line
+    exit(failed)
+
+
+def exit(failed):
     sys.exit(255 if failed else 0)
 
 
-def print_message(message, query):
+def print_message(message, query, last_comment):
     print("FAILED - %s" % (message))
     print("-" * 70)
     print()
     print("Query:")
     print("%s" % query)
+    if last_comment:
+        print("Preceding SQL Comment:")
+        print(last_comment)
