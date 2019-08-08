@@ -7,7 +7,12 @@ from sqlcop.checks.order_by_count import OrderByCountCheck
 
 
 def parse_file(filename):
-    return open(filename, 'r').readlines()
+    try:
+        return open(filename, 'r').readlines()
+    except UnicodeDecodeError:
+        # It's unclear whether or not something still relies on the ascii encoding so I've only changed it to use utf-8
+        # on exception.
+        return open(filename, 'r', encoding="utf-8").readlines()
 
 
 CHECKS = (
